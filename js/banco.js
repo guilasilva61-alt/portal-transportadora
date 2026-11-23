@@ -2,7 +2,11 @@
    Ao abrir, o pacote é carregado para a memória; cada alteração grava o pacote inteiro de novo.
 
    Mesmas regras do transportadora.db: valores em CENTAVOS, preço do litro em MILÉSIMOS, exclusão lógica
-   (excluido = 1, o lançamento antigo continua mostrando o nome) e registro do que foi feito (historico). */
+   (excluido = 1, o lançamento antigo continua mostrando o nome) e registro do que foi feito (historico).
+
+   Sincronização (nuvem.js): cada registro tem um número ÚNICO (hora em milésimos × 1000 + sorteio), para dois aparelhos
+   nunca criarem o mesmo número. Toda mudança avisa banco.aoMudar(tabela, registro); o que chega do outro aparelho entra
+   por banco.mesclar() — vale a versão com atualizado_em mais novo. O historico e a senha ficam só no aparelho. */
 var PT = window.PT || (window.PT = {});
 
 (function (B, U) {
@@ -135,12 +139,71 @@ var PT = window.PT || (window.PT = {});
     if (h.length > LIMITE_HISTORICO) h.splice(0, h.length - LIMITE_HISTORICO);
   };
 
+  // Número novo, único entre aparelhos e sempre crescente neste aparelho (cabe com folga num número exato do JavaScript)
+  var ultimoId = 0;
+  B.novoId = function () {
+    var id = Date.now() * 1000 + Math.floor(Math.random() * 1000);
+    if (id <= ultimoId) id = ultimoId + 1;
+    ultimoId = id;
+    return id;
+  };
+
+  // Avisa quem estiver ouvindo (a sincronização) que um registro mudou
+  P._mudou = function (tabela, r) {
+    if (!this.aoMudar) return;
+    try { this.aoMudar(tabela, JSON.parse(JSON.stringify(r))); } catch (e) { console.warn("sincronização:", e); }
+  };
+
+  // Registro vindo do outro aparelho: entra se for novo ou mais recente que o daqui. Devolve true se mudou algo.
+  P.mesclar = function (tabela, remoto) {
+    if (TABELAS.indexOf(tabela) < 0 || !remoto || !remoto.id) return false;
+    var r = this._bruto(tabela, remoto.id);
+    if (r && String(r.atualizado_em || "") >= String(remoto.atualizado_em || "")) return false;
+    if (r) {
+      Object.keys(r).forEach(function (k) { delete r[k]; });
+      Object.assign(r, remoto);
+    } else {
+      this.d[tabela].push(Object.assign({}, remoto));
+    }
+    if (remoto.id > (this.d.seq[tabela] || 0)) this.d.seq[tabela] = remoto.id;
+    this.salvar();
+    return true;
+  };
+
+  // Ajustes (empresa, listas) mudaram aqui → marca a hora e avisa a sincronização. A senha não vai junto.
+  P.configSemSenha = function () {
+    var c = JSON.parse(JSON.stringify(this.d.config));
+    delete c.senha;
+    return c;
+  };
+  P.mudouConfig = function () {
+    this.d.config_atualizado_em = U.agora();
+    this.salvar();
+    if (this.aoMudarConfig) {
+      try { this.aoMudarConfig(this.configSemSenha(), this.d.config_atualizado_em); } catch (e) { console.warn("sincronização:", e); }
+    }
+  };
+  // Ajustes vindos do outro aparelho (se forem mais novos); a senha daqui continua
+  P.mesclarConfig = function (remoto, quando) {
+    if (!remoto || !quando || String(this.d.config_atualizado_em || "") >= String(quando)) return false;
+    var senha = this.d.config.senha;
+    var c = JSON.parse(JSON.stringify(remoto));
+    delete c.senha;
+    this.d.config = B.validar(Object.assign({}, this.d, {config: c})).config;
+    this.d.config.senha = senha || "";
+    this.d.config_atualizado_em = quando;
+    this.salvar();
+    return true;
+  };
+
   P.criar = function (tabela, dados) {
-    var t = U.agora(), id = ++this.d.seq[tabela];
+    var t = U.agora(), id = B.novoId(tabela);
+    if (id > (this.d.seq[tabela] || 0)) this.d.seq[tabela] = id;
     var r = Object.assign({}, dados, {id: id, criado_em: t, atualizado_em: t, excluido: 0});
     this.d[tabela].push(r);
     this._auditar(tabela, id, "criar", null, dados);
     this.salvar();
+    this._mudou(tabela, r);
     return id;
   };
 
@@ -163,6 +226,7 @@ var PT = window.PT || (window.PT = {});
     Object.assign(r, dados, {atualizado_em: U.agora()});
     this._auditar(tabela, r.id, acao || "editar", antes, dados);
     this.salvar();
+    this._mudou(tabela, r);
     return true;
   };
 
@@ -173,6 +237,7 @@ var PT = window.PT || (window.PT = {});
     r.atualizado_em = U.agora();
     this._auditar(tabela, r.id, "excluir", null, null);
     this.salvar();
+    this._mudou(tabela, r);
     return true;
   };
 

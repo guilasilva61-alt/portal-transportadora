@@ -29,6 +29,93 @@ PT.telas = PT.telas || {};
       '<button type="button" class="botao-pequeno destaque" data-acao="copia">Fazer cópia agora</button></p>';
   };
 
+  // ------------------------------------------------------------------ sincronização (selo e painel)
+  function nuvemDisponivel() { return PT.nuvem && PT.nuvem.disponivel() && location.protocol !== "file:" && !/[?&]demo\b/.test(location.search); }
+
+  // Selo pequeno com a situação da sincronização (Início e Ajustes); some quando ela nem existe neste aparelho
+  T.seloNuvem = function () {
+    if (!nuvemDisponivel()) return '<span id="selo-nuvem" hidden></span>';
+    var e = PT.nuvem.estado(), txt, cor;
+    if (e.situacao === "ligada") {
+      if (!e.online) { txt = "Sem internet: o que lançar aqui vai depois"; cor = "aviso"; }
+      else if (e.pendentes) { txt = "Enviando " + e.pendentes + " alteração(ões)…"; cor = "aviso"; }
+      else { txt = "Sincronizado com os outros aparelhos"; cor = "ok"; }
+    } else if (e.situacao === "confirmar") { txt = "Falta confirmar o e-mail para sincronizar"; cor = "aviso"; }
+    else if (e.situacao === "entrando") { txt = "Entrando…"; cor = "aviso"; }
+    else { txt = "Sincronização desligada (dados só neste aparelho)"; cor = "desligada"; }
+    return '<a id="selo-nuvem" class="selo-nuvem selo-' + cor + '" href="#/ajustes">' + Pc.icone("copia") + "<span>" + h(txt) + "</span></a>";
+  };
+
+  function painelNuvem() {
+    var titulo = '<h2 class="painel-titulo">Sincronização entre aparelhos</h2>';
+    if (!nuvemDisponivel()) {
+      return '<section class="painel-form">' + titulo + '<p class="explica">A sincronização só funciona no portal instalado pelo endereço com cadeado ' +
+        "(não no modo de demonstração).</p></section>";
+    }
+    var e = PT.nuvem.estado();
+    var erro = e.erro ? '<div class="flash flash-erro" role="alert">' + h(e.erro) + "</div>" : "";
+    var corpo;
+    if (e.situacao === "ligada") {
+      corpo = '<p class="explica">Ligada com <b>' + h(e.email) + "</b>. Tudo o que for lançado aqui aparece nos outros aparelhos que " +
+        "entraram com o mesmo e-mail — e o que eles lançam aparece aqui. Sem internet continua funcionando: as alterações ficam " +
+        "guardadas e vão quando a conexão voltar.</p>" + '<p class="explica">' + T.seloNuvem() + "</p>" +
+        '<div class="acoes-form"><button type="button" class="botao-pequeno" data-nuvem="sair">Sair desta conta</button></div>';
+    } else if (e.situacao === "confirmar") {
+      corpo = '<p class="explica">Falta só confirmar o e-mail <b>' + h(e.email) + "</b>: abra a mensagem do Firebase (veja também o Spam), " +
+        "toque no link e depois volte aqui e toque em <b>Já confirmei</b>.</p>" +
+        '<div class="acoes-form"><button type="button" class="botao-salvar sem-seta" data-nuvem="confirmei">Já confirmei</button>' +
+        '<button type="button" class="botao-pequeno" data-nuvem="reenviar">Reenviar o e-mail</button>' +
+        '<button type="button" class="botao-pequeno" data-nuvem="sair">Sair</button></div>';
+    } else {
+      corpo = '<p class="explica">Desligada: os dados ficam <b>só neste aparelho</b>. Para o iPad e o computador mostrarem a mesma coisa, ' +
+        "entre com o <b>mesmo e-mail e senha</b> nos dois. Na primeira vez use <b>Primeira vez: criar acesso</b> (chega um e-mail para confirmar).</p>" +
+        '<form id="form-nuvem" novalidate><div class="campos">' +
+        '<label>E-mail <input class="campo" type="email" name="email" autocomplete="username" autocapitalize="off" value="' + h(e.email) + '"></label>' +
+        '<label>Senha <input class="campo" type="password" name="senha" autocomplete="current-password"></label></div>' +
+        '<div class="acoes-form"><button class="botao-salvar" type="submit"' + (e.situacao === "entrando" ? " disabled" : "") + ">" +
+        (e.situacao === "entrando" ? "Entrando…" : "Entrar") + "</button>" +
+        '<button type="button" class="botao-pequeno" data-nuvem="criar">Primeira vez: criar acesso</button>' +
+        '<button type="button" class="botao-pequeno" data-nuvem="esqueci">Esqueci a senha</button></div></form>';
+    }
+    return '<section class="painel-form" id="painel-nuvem">' + titulo + erro + corpo + "</section>";
+  }
+
+  function ligarNuvem(raiz) {
+    var painel = raiz.querySelector("#painel-nuvem");
+    if (!painel) return;
+    function depois(msg, cat) {
+      return function () { if (msg) PT.app.aviso(msg, cat || "ok"); PT.app.digitando = false; PT.app.render(null, true); };
+    }
+    function falha(e) { PT.app.aviso(e.message, "erro"); PT.app.digitando = false; PT.app.render(null, true); }
+    var form = painel.querySelector("#form-nuvem");
+    var dados = function () { return form ? Pc.lerForm(form) : {}; };
+    if (form) {
+      form.addEventListener("submit", function (ev) {
+        ev.preventDefault();
+        var f = dados();
+        PT.nuvem.entrar(f.email, f.senha).then(depois("Entrou. Os dados deste aparelho e da nuvem estão sendo juntados."), falha);
+      });
+    }
+    painel.querySelectorAll("[data-nuvem]").forEach(function (bt) {
+      bt.addEventListener("click", function () {
+        var acao = bt.dataset.nuvem, f = dados();
+        if (acao === "criar") {
+          PT.nuvem.criarAcesso(f.email, f.senha).then(depois("Acesso criado. Enviamos um e-mail de confirmação para " + String(f.email || "").trim() + "."), falha);
+        } else if (acao === "esqueci") {
+          if (!f.email) { falha(new Error("Digite o e-mail para receber o link de nova senha.")); return; }
+          PT.nuvem.esqueciSenha(f.email).then(depois("Enviamos um link para criar uma senha nova em " + String(f.email).trim() + "."), falha);
+        } else if (acao === "confirmei") {
+          PT.nuvem.jaConfirmei().then(depois("E-mail confirmado: sincronização ligada."), falha);
+        } else if (acao === "reenviar") {
+          PT.nuvem.reenviarConfirmacao().then(depois("E-mail de confirmação enviado de novo."), falha);
+        } else if (acao === "sair") {
+          if (!window.confirm("Sair da sincronização neste aparelho?\n\nOs dados continuam guardados aqui; só param de ir e vir.")) return;
+          PT.nuvem.sair().then(depois("Saiu: este aparelho parou de sincronizar."), falha);
+        }
+      });
+    });
+  }
+
   T[""] = function () {
     var cfg = b().config(), mes = U.mesAtual(), r = b().resumo(mes[0], mes[1]);
     function item(cor, icone, rotulo, valor, sub) {
@@ -49,7 +136,7 @@ PT.telas = PT.telas || {};
     }).join("");
     var html = T.avisoCopia() +
       '<div class="portal-cabeca">' + Pc.logo(cfg, "logo-grande") + '<h1 class="portal-titulo">' + Pc.tituloOuro(cfg.nome) + "</h1>" +
-      '<p class="portal-sub">Resumo de ' + U.mesTxt() + "</p></div>" +
+      '<p class="portal-sub">Resumo de ' + U.mesTxt() + "</p>" + T.seloNuvem() + "</div>" +
       '<div class="resumo-mes">' +
       item("verde", "recebimentos", "Total recebido", r.recebido, r.a_receber ? "a receber: " + U.rs(r.a_receber) : "") +
       item("vermelho", "gasto", "Total gasto", r.gasto, r.a_pagar ? "a pagar: " + U.rs(r.a_pagar) : "") +
@@ -74,9 +161,10 @@ PT.telas = PT.telas || {};
     function area(nome, rotulo) {
       return '<label>' + h(rotulo) + ' <textarea class="campo lista-opcoes" name="' + nome + '" rows="5">' + h(cfg[nome].join("\n")) + "</textarea></label>";
     }
-    var html = "<h1>Ajustes</h1>" +
+    var html = "<h1>Ajustes</h1>" + painelNuvem() +
       '<section class="painel-form"><h2 class="painel-titulo">Cópia de segurança</h2>' +
-      '<p class="explica">Tudo o que é lançado fica guardado <b>só neste iPad</b>. A cópia de segurança é um arquivo com todos os dados: ' +
+      '<p class="explica">Tudo o que é lançado fica guardado <b>neste aparelho</b> (e na nuvem, se a sincronização estiver ligada). ' +
+      "A cópia de segurança é um arquivo com todos os dados: " +
       "salve no iCloud Drive (app Arquivos) ou mande para você mesmo no WhatsApp/e-mail. Se o iPad quebrar, for trocado ou o aplicativo for apagado, " +
       "é com ela que tudo volta.</p>" +
       '<p class="explica">Última cópia: <b>' + ultima + "</b> · Guardado agora: " + c.lancamentos + " lançamento(s), " + c.recebimentos +
@@ -112,6 +200,7 @@ PT.telas = PT.telas || {};
       html: html, menu: "ajustes",
       depois: function (raiz) {
         ligarCopia(raiz);
+        ligarNuvem(raiz);
         var nota = raiz.querySelector("#nota-armazem");
         if (navigator.storage && navigator.storage.persisted) {
           navigator.storage.persisted().then(function (ok) {
@@ -145,7 +234,7 @@ PT.telas = PT.telas || {};
           if (!novo.categorias_despesa.length) novo.categorias_despesa = ["Outros"];
           Object.assign(b().d.config, novo);
           b()._auditar("config", 0, "editar", null, novo);
-          b().salvar();
+          b().mudouConfig();
           PT.app.aviso("Ajustes salvos." + (tirados ? " (“Pedágio” saiu das categorias: ele tem botão próprio nos Lançamentos.)" : ""), "ok");
           PT.app.montarTopo();
           PT.app.render(null, true);

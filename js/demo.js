@@ -3,7 +3,14 @@
 var PT = window.PT || (window.PT = {});
 
 PT.demo = {
+  // Demonstração com números pequenos (1, 2, 3…) em cada tabela: as fotos das telas e o recibo usam ?func=1, ?editar=3…
   preencher: function (b) {
+    "use strict";
+    var original = PT.banco.novoId, cont = {};
+    PT.banco.novoId = function (tabela) { cont[tabela] = (cont[tabela] || 0) + 1; return cont[tabela]; };
+    try { PT.demo._preencher(b); } finally { PT.banco.novoId = original; }
+  },
+  _preencher: function (b) {
     "use strict";
     var U = PT.util, R = PT.regras, hoje = U.hoje();
     var dia = function (n) { return U.somaDias(hoje, -n); };

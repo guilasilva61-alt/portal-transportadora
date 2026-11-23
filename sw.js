@@ -1,14 +1,15 @@
 /* Funcionamento sem internet: guarda os arquivos do portal no iPad e abre sempre daqui.
    Ao mudar qualquer arquivo do portal, AUMENTE a VERSAO abaixo (é ela que faz o iPad baixar a versão nova).
    Os DADOS não passam por aqui: ficam no banco do aparelho (IndexedDB). */
-var VERSAO = "pt-ipad-1.0.0";
+var VERSAO = "pt-ipad-1.1.0";
 var ARQUIVOS = [
   "./", "index.html", "manifest.webmanifest",
   "css/estilo.css", "css/transportadora.css", "css/tema.css", "css/ipad.css", "css/fundo.svg",
   "img/icone.svg", "img/icone-180.png", "img/icone-192.png", "img/icone-512.png",
   "js/util.js", "js/extenso.js", "js/regras.js", "js/banco.js", "js/relatorios.js", "js/pecas.js", "js/comportamento.js",
   "js/tela_inicio.js", "js/tela_lancamentos.js", "js/tela_recebimentos.js", "js/tela_cadastros.js", "js/tela_relatorios.js",
-  "js/demo.js", "js/app.js"
+  "js/demo.js", "js/nuvem.js", "js/app.js",
+  "js/firebase/firebase-app-compat.js", "js/firebase/firebase-auth-compat.js", "js/firebase/firebase-firestore-compat.js"
 ];
 
 self.addEventListener("install", function (e) {
@@ -26,6 +27,8 @@ self.addEventListener("activate", function (e) {
 // Primeiro o que está guardado (abre na hora, mesmo sem internet); se não tiver, busca na internet
 self.addEventListener("fetch", function (e) {
   if (e.request.method !== "GET") return;
+  // Sincronização (Google/Firebase) vai direto para a internet: não passa pela guarda de arquivos
+  if (new URL(e.request.url).origin !== self.location.origin) return;
   e.respondWith(caches.match(e.request, {ignoreSearch: true}).then(function (r) {
     return r || fetch(e.request).catch(function () { return caches.match("index.html"); });
   }));

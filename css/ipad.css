@@ -123,3 +123,12 @@ select.campo:focus, select.campo-filtro:focus {
 .folha .valor { display: block; width: 100%; max-width: none; text-align: center; border: 0; padding: 0; font-size: 20px; }
 @media print { body.modo-recibo .folha .via { height: 134mm; } body.modo-recibo main { min-height: 0; } }
 @media print { body.modo-recibo { min-height: 0 !important; } body.modo-recibo main { padding: 0 !important; margin: 0 !important; max-width: none; } .faixa-versao { display: none !important; } }
+
+/* sincronização: selo de situação (Início e Ajustes) */
+.selo-nuvem { display: inline-flex; align-items: center; gap: 8px; margin-top: 10px; padding: 6px 14px; border-radius: 999px;
+  font-size: .9rem; text-decoration: none; border: 1px solid rgba(255, 255, 255, .14); color: var(--t-suave); }
+.selo-nuvem .icone { width: 18px; height: 18px; }
+.selo-nuvem.selo-ok { color: #7ee2a8; border-color: rgba(126, 226, 168, .45); }
+.selo-nuvem.selo-aviso { color: var(--t-ouro-claro); border-color: rgba(247, 197, 49, .5); }
+#painel-nuvem .acoes-form { flex-wrap: wrap; gap: 10px; }
+@media print { .selo-nuvem { display: none !important; } }

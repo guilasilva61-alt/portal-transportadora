@@ -1,7 +1,7 @@
 /* Portal Transportadora (iPad) — partida do aplicativo: abre o banco do aparelho, monta o topo, troca de tela pelo
    endereço (#/lancamentos, #/relatorios/geral…), avisos, senha, cópia de segurança e funcionamento sem internet. */
 var PT = window.PT || (window.PT = {});
-PT.VERSAO = "1.0.0";
+PT.VERSAO = "1.1.0";
 
 (function (A, U, Pc) {
   "use strict";
@@ -42,6 +42,7 @@ PT.VERSAO = "1.0.0";
     avisos = [];
     document.body.classList.toggle("modo-recibo", r.modo === "recibo");
     main.innerHTML = topoAvisos + r.html;
+    A.digitando = false;
     document.querySelectorAll("[data-menu]").forEach(function (a) { a.classList.toggle("ativo", a.dataset.menu === r.menu); });
     if (r.depois) {
       try { r.depois(main); } catch (e) { console.error(e); setTimeout(function () { throw e; }); }
@@ -101,6 +102,7 @@ PT.VERSAO = "1.0.0";
           "ATENÇÃO: tudo o que está no iPad agora será TROCADO pelo que está na cópia.");
         if (!ok) { A.aviso("Restauração cancelada: nada mudou.", "aviso"); A.render(null, true); return; }
         A.banco.restaurar(pacote).then(function () {
+          if (PT.nuvem.enviarTudo) PT.nuvem.enviarTudo();
           A.montarTopo();
           A.aviso("Cópia restaurada. Confira os lançamentos.", "ok");
           A.ir("#/");
@@ -201,6 +203,33 @@ PT.VERSAO = "1.0.0";
     }).catch(function (e) { console.warn("sem modo offline:", e); });
   }
 
+  // ------------------------------------------------------------------ sincronização
+  // Chegou lançamento do outro aparelho: redesenha a tela, a não ser que a pessoa esteja preenchendo um formulário
+  // (aí os dados novos aparecem na próxima troca de tela, sem perder o que foi digitado).
+  document.addEventListener("input", function (e) {
+    if (e.target && e.target.closest && e.target.closest("form")) A.digitando = true;
+  });
+  function chegaramDados() {
+    if (A.bloqueado || A.digitando) return;
+    var ativo = document.activeElement;
+    if (ativo && /^(INPUT|SELECT|TEXTAREA)$/.test(ativo.tagName)) return;
+    A.render(null, true);
+  }
+  function ligarNuvem(demo) {
+    if (demo || location.protocol === "file:" || !PT.nuvem.disponivel()) return;
+    try {
+      PT.nuvem.iniciar(A.banco, chegaramDados);
+      PT.nuvem.aoMudarEstado(function () {
+        var el = document.getElementById("selo-nuvem");
+        if (el && PT.telas.seloNuvem) el.outerHTML = PT.telas.seloNuvem();
+        if (A.telaAtual() === "ajustes" && !A.digitando) {
+          var ativo = document.activeElement;
+          if (!(ativo && /^(INPUT|SELECT|TEXTAREA)$/.test(ativo.tagName))) A.render(null, true);
+        }
+      });
+    } catch (e) { console.warn("sincronização desligada:", e); }
+  }
+
   // ------------------------------------------------------------------ partida
   A.iniciar = function () {
     var demo = /[?&]demo\b/.test(location.search);
@@ -209,6 +238,7 @@ PT.VERSAO = "1.0.0";
     return A.banco.carregar().then(function () {
       if (demo) PT.demo.preencher(A.banco);
       if (!demo && navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function () {});
+      ligarNuvem(demo);
       A.montarTopo();
       window.addEventListener("hashchange", function () { A.render(); });
       if (A.banco.config().senha && !demo) PT.senha.bloquear();
