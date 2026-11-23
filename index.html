@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Portal Transportadora</title>
+  <meta name="theme-color" content="#060607">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Transportadora">
+  <meta name="format-detection" content="telephone=no">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="img/icone.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="img/icone-180.png">
+  <link rel="stylesheet" href="css/estilo.css">
+  <link rel="stylesheet" href="css/transportadora.css">
+  <link rel="stylesheet" href="css/tema.css">
+  <link rel="stylesheet" href="css/ipad.css">
+</head>
+<body>
+  <header class="topo" id="topo"></header>
+  <main id="conteudo"><p class="nota carregando">Abrindo…</p></main>
+  <footer class="assinatura">Portal Transportadora · Desenvolvido por Guilherme Silva</footer>
+  <button type="button" class="faixa-versao" id="faixa-versao" hidden>Nova versão do portal pronta — toque aqui para atualizar</button>
+  <noscript><p class="caixa-erro">Ative o JavaScript do Safari para usar o portal.</p></noscript>
+
+  <script src="js/util.js"></script>
+  <script src="js/extenso.js"></script>
+  <script src="js/regras.js"></script>
+  <script src="js/banco.js"></script>
+  <script src="js/relatorios.js"></script>
+  <script src="js/pecas.js"></script>
+  <script src="js/comportamento.js"></script>
+  <script src="js/tela_inicio.js"></script>
+  <script src="js/tela_lancamentos.js"></script>
+  <script src="js/tela_recebimentos.js"></script>
+  <script src="js/tela_cadastros.js"></script>
+  <script src="js/tela_relatorios.js"></script>
+  <script src="js/demo.js"></script>
+  <script src="js/app.js"></script>
+  <script>PT.app.iniciar();</script>
+</body>
+</html>

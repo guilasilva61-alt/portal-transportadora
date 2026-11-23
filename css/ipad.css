@@ -1,0 +1,125 @@
+/* Portal Transportadora (iPad) — ajustes para tela de toque e peças novas. Carregado por último. */
+
+/* barra de status do iPad por cima do topo (aplicativo em tela cheia) */
+.topo { padding-top: max(8px, env(safe-area-inset-top)); padding-left: max(24px, env(safe-area-inset-left));
+  padding-right: max(24px, env(safe-area-inset-right)); }
+main { padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right));
+  padding-bottom: max(16px, env(safe-area-inset-bottom)); }
+html { -webkit-text-size-adjust: 100%; }
+body { -webkit-tap-highlight-color: rgba(247, 197, 49, .18); overscroll-behavior-y: none; }
+.topo .marca { text-decoration: none; }
+.carregando { text-align: center; padding: 40px 0; }
+
+/* toque: alvos maiores e sem "pulinho" de hover que fica preso no dedo */
+.botao-pequeno, .acoes-linha .botao-pequeno, button.selo-situacao { min-height: 40px; display: inline-flex; align-items: center;
+  justify-content: center; padding-left: 14px; padding-right: 14px; cursor: pointer; }
+button.selo-situacao { min-height: 36px; }
+.acoes-linha { display: flex; gap: 6px; align-items: center; }
+.tabela.lista td.acoes-linha { display: table-cell; }
+.tabela.lista td.acoes-linha > * { margin: 2px 0; }
+.rolagem { -webkit-overflow-scrolling: touch; }
+.segmentado span { padding: 12px 20px; }
+.tipo-botao { min-height: 78px; }
+.botao-salvar { min-height: 54px; }
+.botao-salvar.sem-seta::after { content: none; }
+.botao-salvar .icone { width: 22px; height: 22px; vertical-align: -4px; margin-right: 4px; }
+.campo, select.campo { font-size: 1.15rem; }      /* 16px ou mais: o iPad não dá zoom ao tocar no campo */
+.campo-filtro { font-size: 16px; min-height: 42px; }
+select.campo, select.campo-filtro { -webkit-appearance: none; appearance: none; padding-right: 34px;
+  background-image: linear-gradient(45deg, transparent 50%, #c9c8cf 50%), linear-gradient(135deg, #c9c8cf 50%, transparent 50%);
+  background-position: calc(100% - 18px) 50%, calc(100% - 12px) 50%; background-size: 6px 6px, 6px 6px; background-repeat: no-repeat; }
+input[type=date].campo, input[type=date].campo-filtro { -webkit-appearance: none; appearance: none; display: flex; align-items: center; }
+input[type=date]::-webkit-date-and-time-value { text-align: left; }
+@media (hover: none) {
+  .cartao:hover, .tipo-botao:hover { transform: none; }
+  .tabela tbody tr:hover td { background: transparent; }
+}
+
+/* textos de explicação e listas de opções (Ajustes) */
+.explica { color: var(--t-suave); line-height: 1.5; margin: 0 0 10px; max-width: 820px; }
+.explica b { color: var(--t-texto); }
+textarea.lista-opcoes { min-height: 132px; font-size: 1rem; line-height: 1.45; resize: vertical; }
+.painel-titulo.sub { margin-top: 22px; }
+.painel-titulo small { color: var(--t-suave); font-weight: 400; font-size: .85rem; }
+.botao-arquivo { position: relative; overflow: hidden; }
+.botao-arquivo input { position: absolute; inset: 0; opacity: 0; font-size: 100px; cursor: pointer; }
+.nota-armazem { margin-top: 12px; font-size: .9rem; }
+.nota-armazem:empty { display: none; }
+.versao { text-align: center; margin: 20px 0 0; }
+
+/* lembrete da cópia de segurança (Início) */
+.faixa-copia { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 16px; border-radius: 14px; max-width: 1080px;
+  margin: 8px auto 0; }
+.faixa-copia .icone { width: 26px; height: 26px; flex: none; color: var(--t-ouro); }
+.faixa-copia span { flex: 1; min-width: 240px; }
+
+/* aviso de versão nova */
+.faixa-versao { position: fixed; left: 50%; bottom: max(16px, env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 60;
+  background: var(--t-vidro-forte); color: var(--t-ouro-claro); border: 1px solid rgba(247, 197, 49, .55); border-radius: 999px;
+  padding: 12px 22px; font: inherit; font-weight: 700; box-shadow: var(--t-sombra); -webkit-backdrop-filter: var(--t-desfoque);
+  backdrop-filter: var(--t-desfoque); cursor: pointer; max-width: 92vw; }
+.faixa-versao[hidden] { display: none; }
+
+/* tela da senha */
+body.tela-login .assinatura { display: none; }
+.cena .caixa-login { display: flex; flex-direction: column; }
+.cena .flash[hidden] { display: none; }
+
+/* iPad em pé (~820 px): menu numa linha embaixo da logo */
+@media (max-width: 1000px) {
+  .topo { flex-direction: column; align-items: stretch; gap: 6px; }
+  .topo-esquerda { flex-direction: row; align-items: center; }
+  .menu { margin-left: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .menu a { min-width: 0; }
+  .logo-topo.logo-texto { height: 44px; }
+  .logo-topo .logo-sigla { min-width: 40px; height: 40px; font-size: 1.1rem; }
+}
+
+/* ===================== RECIBO (2 vias numa folha A4) ===================== */
+body.modo-recibo .topo, body.modo-recibo .assinatura { display: none; }
+body.modo-recibo::before, body.modo-recibo::after { display: none; }
+body.modo-recibo { background: #e9ecf1; color: #111; }
+body.modo-recibo main > * { animation: none; }
+.barra-recibo { text-align: center; margin: 10px; display: flex; gap: 10px; justify-content: center; }
+body.modo-recibo .barra-recibo .botao-pequeno { background: #fff; color: #0f2242; border-color: #9aa3b2; }
+body.modo-recibo .barra-recibo .botao-pequeno.destaque { background: linear-gradient(180deg, #ffe066, #f7c531 55%, #e9a90f); color: #1a1405; border: 0; }
+.folha { width: 190mm; max-width: 100%; margin: 10px auto; background: #fff; color: #111; font-family: "Segoe UI", -apple-system, Arial, sans-serif; }
+.folha .via { height: 136mm; padding: 8mm 9mm; border: 1px solid #999; display: flex; flex-direction: column; overflow: hidden; }
+.folha .corte { border-top: 1px dashed #666; margin: 4mm 0; text-align: center; font-size: 9px; color: #666; height: 0; }
+.folha .corte span { position: relative; top: -7px; background: #fff; padding: 0 6px; }
+.folha .cab { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #0f2242; padding-bottom: 4px; }
+.folha .emp { font-weight: 800; font-size: 15px; color: #0f2242; display: flex; align-items: center; gap: 8px; }
+.folha .emp small { display: block; font-weight: 400; color: #444; font-size: 11px; }
+.folha .via-nome { font-weight: 800; font-size: 12px; border: 2px solid #0f2242; padding: 2px 8px; border-radius: 4px; color: #0f2242; }
+.folha h1 { font-size: 17px; margin: 6px 0 2px; text-align: center; letter-spacing: 1px; color: #111; }
+.folha .valor { text-align: center; font-size: 20px; font-weight: 800; margin: 2px 0 4px; }
+.folha p { margin: 3px 0; font-size: 12px; line-height: 1.4; color: #111; }
+.folha table { width: 100%; border-collapse: collapse; font-size: 11px; margin: 4px 0; color: #111; }
+.folha th, .folha td { border-bottom: 1px solid #ccc; padding: 2px 4px; text-align: left; background: #fff; }
+.folha td.n, .folha th.n { text-align: right; white-space: nowrap; }
+.folha tfoot td { font-weight: 800; border-top: 1.5px solid #333; border-bottom: 0; }
+.folha .itens { flex: 1; overflow: hidden; }
+.folha .assinaturas { display: flex; gap: 14mm; margin-top: 6mm; }
+.folha .assinaturas div { flex: 1; text-align: center; border-top: 1px solid #111; padding-top: 2px; font-size: 11px; }
+.folha .local { font-size: 11px; text-align: right; margin-top: 2mm; }
+
+@media print {
+  @page { size: A4 portrait; margin: 10mm; }
+  .faixa-versao, .faixa-copia, .flash { display: none !important; }
+  body.modo-recibo { background: #fff; }
+  body.modo-recibo .barra-recibo { display: none; }
+  body.modo-recibo main { padding: 0; margin: 0; }
+  body.modo-recibo .folha { margin: 0; width: 190mm; }
+  .topo, .assinatura, .nao-imprimir { display: none !important; }
+}
+
+/* listas: data, placa, valor e situação sem quebrar linha; seta das listas suspensas também com o campo em foco */
+.selo-situacao, .tabela.lista td:first-child, .tabela.lista td.num, .tipo-selo { white-space: nowrap; }
+.tabela.lista td:nth-child(4) { white-space: nowrap; }
+select.campo:focus, select.campo-filtro:focus {
+  background-image: linear-gradient(45deg, transparent 50%, #f7c531 50%), linear-gradient(135deg, #f7c531 50%, transparent 50%);
+  background-position: calc(100% - 18px) 50%, calc(100% - 12px) 50%; background-size: 6px 6px, 6px 6px; background-repeat: no-repeat; }
+.tabela.lista td.detalhe { min-width: 250px; }
+.folha .valor { display: block; width: 100%; max-width: none; text-align: center; border: 0; padding: 0; font-size: 20px; }
+@media print { body.modo-recibo .folha .via { height: 134mm; } body.modo-recibo main { min-height: 0; } }
+@media print { body.modo-recibo { min-height: 0 !important; } body.modo-recibo main { padding: 0 !important; margin: 0 !important; max-width: none; } .faixa-versao { display: none !important; } }

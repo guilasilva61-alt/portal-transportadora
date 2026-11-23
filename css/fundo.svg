@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
+  <!-- Fundo do tema: preto com faixas de seda dourada (desfocadas) e fios de luz. Sem internet, sem imagem. -->
+  <defs>
+    <linearGradient id="ouro" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#000" stop-opacity="0"/>
+      <stop offset=".35" stop-color="#8a5a12"/>
+      <stop offset=".55" stop-color="#f2b33d"/>
+      <stop offset=".7" stop-color="#a8641a"/>
+      <stop offset="1" stop-color="#000" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="ouro2" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#000" stop-opacity="0"/>
+      <stop offset=".4" stop-color="#5c3608"/>
+      <stop offset=".62" stop-color="#d48a22"/>
+      <stop offset="1" stop-color="#000" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="fio" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ffd27a" stop-opacity="0"/>
+      <stop offset=".5" stop-color="#ffe2a0"/>
+      <stop offset="1" stop-color="#ffd27a" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="grafite" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2a2a30"/>
+      <stop offset="1" stop-color="#0b0b0d"/>
+    </linearGradient>
+    <radialGradient id="vinheta" cx=".5" cy=".5" r=".75">
+      <stop offset=".55" stop-color="#000" stop-opacity="0"/>
+      <stop offset="1" stop-color="#000" stop-opacity=".85"/>
+    </radialGradient>
+    <filter id="d60" filterUnits="userSpaceOnUse" x="-300" y="-300" width="2200" height="1600"><feGaussianBlur stdDeviation="60"/></filter>
+    <filter id="d24" filterUnits="userSpaceOnUse" x="-300" y="-300" width="2200" height="1600"><feGaussianBlur stdDeviation="24"/></filter>
+    <filter id="d6" filterUnits="userSpaceOnUse" x="-300" y="-300" width="2200" height="1600"><feGaussianBlur stdDeviation="6"/></filter>
+    <filter id="d1" filterUnits="userSpaceOnUse" x="-300" y="-300" width="2200" height="1600"><feGaussianBlur stdDeviation="1.2"/></filter>
+  </defs>
+  <rect width="1600" height="1000" fill="#050506"/>
+  <!-- volumes escuros (seda grafite) -->
+  <path d="M-200 820 C 200 560, 520 980, 900 700 S 1500 520, 1800 760 L 1800 1100 L -200 1100 Z" fill="url(#grafite)" opacity=".9" filter="url(#d24)"/>
+  <path d="M-200 140 C 260 40, 600 380, 1000 220 S 1560 -60, 1800 120 L 1800 -100 L -200 -100 Z" fill="url(#grafite)" opacity=".7" filter="url(#d24)"/>
+  <!-- faixas douradas largas (brilho difuso) -->
+  <path d="M-100 420 C 300 180, 700 640, 1100 380 S 1500 160, 1750 300" stroke="url(#ouro)" stroke-width="150" fill="none" opacity=".55" filter="url(#d60)"/>
+  <path d="M-150 760 C 250 620, 640 900, 1050 640 S 1450 460, 1750 560" stroke="url(#ouro2)" stroke-width="120" fill="none" opacity=".5" filter="url(#d60)"/>
+  <!-- faixas médias (dobras da seda) -->
+  <path d="M-100 400 C 300 170, 700 630, 1100 370 S 1500 150, 1750 290" stroke="url(#ouro)" stroke-width="46" fill="none" opacity=".75" filter="url(#d24)"/>
+  <path d="M-150 740 C 250 600, 640 880, 1050 620 S 1450 440, 1750 540" stroke="url(#ouro2)" stroke-width="36" fill="none" opacity=".7" filter="url(#d24)"/>
+  <path d="M-100 120 C 260 300, 620 40, 1000 160 S 1450 380, 1750 200" stroke="url(#ouro2)" stroke-width="28" fill="none" opacity=".45" filter="url(#d24)"/>
+  <!-- fios de luz (a borda brilhante das dobras) -->
+  <path d="M-100 392 C 300 162, 700 622, 1100 362 S 1500 142, 1750 282" stroke="url(#fio)" stroke-width="4" fill="none" opacity=".9" filter="url(#d6)"/>
+  <path d="M-100 392 C 300 162, 700 622, 1100 362 S 1500 142, 1750 282" stroke="url(#fio)" stroke-width="1.4" fill="none" opacity=".9" filter="url(#d1)"/>
+  <path d="M-150 732 C 250 592, 640 872, 1050 612 S 1450 432, 1750 532" stroke="url(#fio)" stroke-width="1.2" fill="none" opacity=".7" filter="url(#d1)"/>
+  <path d="M-100 470 C 320 260, 690 700, 1120 450 S 1520 240, 1750 380" stroke="url(#fio)" stroke-width="1" fill="none" opacity=".35" filter="url(#d1)"/>
+  <path d="M-100 128 C 260 308, 620 48, 1000 168 S 1450 388, 1750 208" stroke="url(#fio)" stroke-width="1" fill="none" opacity=".4" filter="url(#d1)"/>
+  <rect width="1600" height="1000" fill="url(#vinheta)"/>
+</svg>
